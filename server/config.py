@@ -1,8 +1,8 @@
 # Server configuration — edit before deploying
 
 # Location for weather (Open-Meteo)
-LAT = 51.5074   # London default — update to your coords
-LON = -0.1278
+LAT = 60.1699  # Helsinki
+LON = 24.9384
 
 # Tasks: list of (room, interval_days)
 # interval_days = how long before a task is considered overdue
@@ -16,7 +16,7 @@ TASKS = [
 # Path to task state JSON (tracks last-done timestamps)
 TASK_STATE_PATH = "tasks_state.json"
 
-# MQTT broker (for button daemon and node health, future use)
+# MQTT broker — hub home-network IP (bse0 ethernet uplink). TBD once confirmed.
 MQTT_HOST = "localhost"
 MQTT_PORT = 1883
 
