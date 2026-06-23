@@ -8,10 +8,10 @@ POLL_SCRIPT="$DISPLAY_DIR/poll.sh"
 # Disable screensaver
 lipc-set-prop com.lab126.powerd preventScreenSaver 1
 
-# Poll loop — runs every 5 minutes in background
+# Poll loop — runs hourly in background
 while true; do
     sh "$POLL_SCRIPT"
-    sleep 300
+    sleep 3600
 done &
 
 # Start button daemon in background, restart if it dies
