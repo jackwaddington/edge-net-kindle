@@ -7,9 +7,13 @@ SERVER_PORT="8080"
 DASHBOARD_URL="http://$SERVER_IP:$SERVER_PORT/kindle/display.png"
 IMAGE_PATH="/mnt/us/kindle/display.png"
 
+EIPS=/usr/sbin/eips
+TMP_PATH="${IMAGE_PATH}.tmp"
+
 # Fetch image — fail silently (display keeps last image if server unreachable)
-wget -q -O "$IMAGE_PATH" "$DASHBOARD_URL" || exit 0
+wget -q -O "$TMP_PATH" "$DASHBOARD_URL" || exit 0
+mv "$TMP_PATH" "$IMAGE_PATH"
 
 # Render to e-ink
-eips -c
-eips -g "$IMAGE_PATH"
+$EIPS -c
+$EIPS -g "$IMAGE_PATH"
