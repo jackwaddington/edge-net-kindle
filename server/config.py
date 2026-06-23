@@ -16,8 +16,8 @@ TASKS = [
 # Path to task state JSON (tracks last-done timestamps)
 TASK_STATE_PATH = "tasks_state.json"
 
-# MQTT broker — hub home-network IP (bse0 ethernet uplink). TBD once confirmed.
-MQTT_HOST = "localhost"
+# MQTT broker — hub home-network IP (bse0 ethernet uplink, 192.168.0.145)
+MQTT_HOST = "192.168.0.145"
 MQTT_PORT = 1883
 
 # HTTP port for this server
