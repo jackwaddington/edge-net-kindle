@@ -8,10 +8,10 @@ POLL_SCRIPT="$DISPLAY_DIR/poll.sh"
 # Disable screensaver
 lipc-set-prop com.lab126.powerd preventScreenSaver 1
 
-# Install cron job if not already present
+# Install cron job via user crontab if not already present
 CRON_LINE="*/5 * * * * $POLL_SCRIPT"
-if ! grep -qF "$POLL_SCRIPT" /etc/crontab 2>/dev/null; then
-    echo "$CRON_LINE" >> /etc/crontab
+if ! crontab -l 2>/dev/null | grep -qF "$POLL_SCRIPT"; then
+    (crontab -l 2>/dev/null; echo "$CRON_LINE") | crontab -
 fi
 
 # Start button daemon in background, restart if it dies
