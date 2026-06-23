@@ -2,6 +2,11 @@
 # Kindle startup script — called via @reboot cron entry on boot.
 # Cron handles the hourly poll; this script handles boot-time init and button daemon.
 
+# Guard: crond fires @reboot on every crontab reload, not just real boot.
+# /tmp is tmpfs — cleared on boot, so this runs fully once per boot only.
+[ -f /tmp/startup_done ] && exit 0
+touch /tmp/startup_done
+
 DISPLAY_DIR="/mnt/us/kindle"
 POLL_SCRIPT="$DISPLAY_DIR/poll.sh"
 BUTTONS_SCRIPT="$DISPLAY_DIR/buttons.sh"
