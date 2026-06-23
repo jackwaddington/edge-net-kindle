@@ -1,24 +1,23 @@
 #!/bin/sh
-# Kindle startup script — place at /mnt/us/kindle/startup.sh
-# Called from /etc/rc.d/userscripts.d/ or equivalent on-boot hook.
+# Kindle startup script — called via @reboot cron entry on boot.
+# Cron handles the hourly poll; this script handles boot-time init and button daemon.
 
 DISPLAY_DIR="/mnt/us/kindle"
 POLL_SCRIPT="$DISPLAY_DIR/poll.sh"
+BUTTONS_SCRIPT="$DISPLAY_DIR/buttons.sh"
+BUTTONS_PID="/tmp/buttons.pid"
 
 # Disable screensaver
 lipc-set-prop com.lab126.powerd preventScreenSaver 1
 
-# Poll loop — runs hourly in background
-while true; do
-    sh "$POLL_SCRIPT"
-    sleep 3600
-done &
+# Button daemon — nohup so it survives the calling session ending
+if [ -f "$BUTTONS_PID" ] && kill -0 "$(cat $BUTTONS_PID)" 2>/dev/null; then
+    : # already running
+else
+    nohup sh -c "while true; do sh $BUTTONS_SCRIPT; sleep 2; done" \
+        > /tmp/buttons.log 2>&1 &
+    echo $! > "$BUTTONS_PID"
+fi
 
-# Start button daemon in background, restart if it dies
-while true; do
-    sh "$DISPLAY_DIR/buttons.sh"
-    sleep 2
-done &
-
-# Run poll immediately so display shows on boot
-"$POLL_SCRIPT"
+# Poll immediately on boot (cron handles hourly after this)
+sh "$POLL_SCRIPT"
