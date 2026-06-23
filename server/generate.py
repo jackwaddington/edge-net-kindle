@@ -1,77 +1,80 @@
 """
-Dashboard image generator.
 Produces a 600x800 greyscale PNG for the Kindle 4 display.
-Serve the output at an HTTP endpoint the Kindle can poll.
+Serve the output via app.py.
 """
 
 from PIL import Image, ImageDraw, ImageFont
-from datetime import datetime
+from weather import get_weather
+from tasks import get_tasks
 
 WIDTH, HEIGHT = 600, 800
-BG = 255   # white
-FG = 0     # black
+BG = 255
+FG = 0
+PADDING = 24
 
-# TODO: pull from real sources
-def get_weather():
-    # Return (will_rain: bool, rain_time: str | None)
-    return False, None
+# Font paths — adjust if your server uses different TTF locations
+def _font(size, bold=False):
+    name = "DejaVuSans-Bold.ttf" if bold else "DejaVuSans.ttf"
+    for base in [
+        "/usr/share/fonts/truetype/dejavu",
+        "/usr/share/fonts/dejavu",
+        "/Library/Fonts",
+        "/System/Library/Fonts/Supplemental",
+    ]:
+        path = f"{base}/{name}"
+        try:
+            return ImageFont.truetype(path, size)
+        except OSError:
+            continue
+    return ImageFont.load_default()
 
-def get_tasks():
-    # Return list of (room: str, days_since: int, overdue: bool)
-    return [
-        ("Bathroom", 3, False),
-        ("Bedroom",  11, True),
-    ]
 
-def get_node_health():
-    # Return (all_ok: bool, down_nodes: list[str])
+def get_node_health() -> tuple[bool, list[str]]:
+    # TODO: query MQTT broker for node heartbeats
     return True, []
 
 
-def generate(output_path="display.png"):
+def generate(output_path="display.png") -> None:
     img = Image.new("L", (WIDTH, HEIGHT), BG)
     draw = ImageDraw.Draw(img)
 
-    # Fonts — update paths to actual TTF files on the server
-    font_large  = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 48)
-    font_medium = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 36)
-    font_small  = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 24)
+    font_xl     = _font(52, bold=True)
+    font_large  = _font(40, bold=True)
+    font_medium = _font(32)
+    font_small  = _font(22)
 
-    y = 40
-    padding = 20
+    y = PADDING
 
     # --- Weather ---
     will_rain, rain_time = get_weather()
     if will_rain and rain_time:
-        draw.text((padding, y), f"Rain at {rain_time}", font=font_large, fill=FG)
+        draw.text((PADDING, y), f"Rain at {rain_time}", font=font_xl, fill=FG)
         y += 70
-    # silence if no rain
 
     # --- Divider ---
-    y += 20
-    draw.line([(padding, y), (WIDTH - padding, y)], fill=FG, width=1)
-    y += 30
+    y += 16
+    draw.line([(PADDING, y), (WIDTH - PADDING, y)], fill=FG, width=2)
+    y += 24
 
     # --- Tasks ---
     tasks = get_tasks()
     for room, days, overdue in tasks:
-        marker = " !!" if overdue else ""
-        label = f"{room:<12}{days} days{marker}"
-        font = font_medium
-        draw.text((padding, y), label, font=font, fill=FG)
-        y += 50
+        suffix = " !!" if overdue else ""
+        days_str = f"{days}d" if days < 999 else "never"
+        label = f"{room:<12} {days_str}{suffix}"
+        font = _font(32, bold=overdue)
+        draw.text((PADDING, y), label, font=font, fill=FG)
+        y += 48
 
-    # --- Divider ---
-    y = HEIGHT - 80
-    draw.line([(padding, y), (WIDTH - padding, y)], fill=FG, width=1)
-    y += 20
-
-    # --- Node health ---
+    # --- Node health (bottom) ---
     all_ok, down = get_node_health()
+    y = HEIGHT - 56
+    draw.line([(PADDING, y), (WIDTH - PADDING, y)], fill=FG, width=1)
+    y += 12
     if all_ok:
-        draw.text((padding, y), "All nodes OK", font=font_small, fill=FG)
+        draw.text((PADDING, y), "All nodes OK", font=font_small, fill=FG)
     else:
-        draw.text((padding, y), f"Down: {', '.join(down)}", font=font_small, fill=FG)
+        draw.text((PADDING, y), f"Down: {', '.join(down)}", font=font_small, fill=FG)
 
     img.save(output_path)
 
