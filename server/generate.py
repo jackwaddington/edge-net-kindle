@@ -6,6 +6,7 @@ Serve the output via app.py.
 from PIL import Image, ImageDraw, ImageFont
 from weather import get_weather
 from tasks import get_tasks
+from water import get_water_temp
 
 WIDTH, HEIGHT = 600, 800
 BG = 255
@@ -50,6 +51,12 @@ def generate(output_path="display.png") -> None:
     if will_rain and rain_time:
         draw.text((PADDING, y), f"Rain at {rain_time}", font=font_xl, fill=FG)
         y += 70
+
+    # --- Water temperature ---
+    _, water_temp = get_water_temp()
+    if water_temp is not None:
+        draw.text((PADDING, y), f"Water {water_temp:.1f}°C", font=font_large, fill=FG)
+        y += 56
 
     # --- Divider ---
     y += 16

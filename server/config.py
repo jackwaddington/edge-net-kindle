@@ -22,3 +22,7 @@ MQTT_PORT = 1883
 
 # HTTP port for this server
 HTTP_PORT = 8080
+
+# Data API (GPS/sensor backend)
+DATA_API_BASE = "http://192.168.0.63:8000"
+WATER_SENSOR_ID = "70B3D57050011439"  # Marjaniemi
