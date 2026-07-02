@@ -14,7 +14,7 @@ TASKS = [
 ]
 
 # Path to task state JSON (tracks last-done timestamps)
-TASK_STATE_PATH = "tasks_state.json"
+TASK_STATE_PATH = "/var/lib/kindle-server/tasks_state.json"
 
 # MQTT broker — hub home-network IP (bse0 ethernet uplink, 192.168.0.145)
 MQTT_HOST = "192.168.0.145"
