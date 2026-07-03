@@ -1,0 +1,8 @@
+ClientList.csv
+firmware/
+Update_*.bin
+.DS_Store
+.Rhistory
+__pycache__/
+.claude/settings.json
+node_modules/
