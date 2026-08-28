@@ -23,7 +23,7 @@ jobs:
           context: .
           push: true
           tags: |
-            ghcr.io/jackwaddington/kindle-serveratest
+            ghcr.io/jackwaddington/kindle-server:latest
             ghcr.io/jackwaddington/kindle-server:${{ steps.meta.outputs.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
