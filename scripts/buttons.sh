@@ -2,7 +2,7 @@
 # Button daemon — runs on the Kindle, publishes button events to Edge-NET via
 # the kindle-server HTTP bridge. Loops forever; restart on exit via startup.sh.
 
-SERVER="http://192.168.0.62:8080"
+SERVER="http://192.168.0.57"   # nginx-proxy, see poll.sh
 
 # Map lipc keypress scancode → button name
 # Kindle 4 scancodes: 193=up 194=down 195=left 196=right 197=select

@@ -1,9 +1,11 @@
 #!/bin/sh
 # Runs on the Kindle via cron. Fetches the latest display image and renders it.
 
-# Update SERVER_IP to match your dashboard server's IP on the local network
-SERVER_IP="192.168.0.62"
-SERVER_PORT="8080"
+# nginx-proxy (CT207): its default server path-routes /kindle, /button and
+# /tasks to kindle-server on apps-01. The Kindle can't send a Host header,
+# so it must use this IP-based route rather than a hostname.
+SERVER_IP="192.168.0.57"
+SERVER_PORT="80"
 DASHBOARD_URL="http://$SERVER_IP:$SERVER_PORT/kindle/display.png"
 IMAGE_PATH="/mnt/us/kindle/display.png"
 
