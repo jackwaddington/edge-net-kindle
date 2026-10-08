@@ -15,14 +15,20 @@ BUTTONS_PID="/var/buttons.pid"
 # Disable screensaver
 lipc-set-prop com.lab126.powerd preventScreenSaver 1
 
-# Button daemon — nohup so it survives the calling session ending
+# Button daemon. The K4's BusyBox has no nohup; started from cron/init there
+# is no controlling terminal to hang up on, so a plain background job is enough.
 if [ -f "$BUTTONS_PID" ] && kill -0 "$(cat $BUTTONS_PID)" 2>/dev/null; then
     : # already running
 else
-    nohup sh -c "while true; do sh $BUTTONS_SCRIPT; sleep 2; done" \
+    sh -c "while true; do sh $BUTTONS_SCRIPT; sleep 2; done" \
         > /var/buttons.log 2>&1 &
     echo $! > "$BUTTONS_PID"
 fi
 
-# Poll immediately on boot (cron handles hourly after this)
-sh "$POLL_SCRIPT"
+# Poll on boot, retrying while WiFi comes up: poll.sh exits silently on a
+# failed fetch, so a single attempt at boot usually left the old image up.
+for i in 1 2 3 4 5 6 7 8 9 10; do
+    sh "$POLL_SCRIPT"
+    [ "$(find "$DISPLAY_DIR/display.png" -mmin -2 2>/dev/null)" ] && break
+    sleep 30
+done
