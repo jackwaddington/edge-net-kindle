@@ -15,6 +15,11 @@ BUTTONS_PID="/var/buttons.pid"
 # Disable screensaver
 lipc-set-prop com.lab126.powerd preventScreenSaver 1
 
+# Dedicated dashboard: stop the Kindle UI. It grabs the keypad exclusively
+# (buttons.sh would never see a press) and draws menus over the dashboard.
+# Undo with `/etc/init.d/framework start` or a reboot without this script.
+/etc/init.d/framework stop
+
 # Button daemon. The K4's BusyBox has no nohup; started from cron/init there
 # is no controlling terminal to hang up on, so a plain background job is enough.
 if [ -f "$BUTTONS_PID" ] && kill -0 "$(cat $BUTTONS_PID)" 2>/dev/null; then
