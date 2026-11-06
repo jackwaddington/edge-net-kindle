@@ -7,21 +7,10 @@ import os
 LAT = float(os.environ.get("KINDLE_LAT", "60.1699"))  # Helsinki
 LON = float(os.environ.get("KINDLE_LON", "24.9384"))
 
-# Tasks: list of (room, interval_days)
-# interval_days = how long before a task is considered overdue
-TASKS = [
-    ("Bathroom",  7),
-    ("Bedroom",  14),
-    ("Kitchen",   7),
-    ("Hallway",  14),
-]
-
-# Path to task state JSON (tracks last-done timestamps)
-TASK_STATE_PATH = "/var/lib/kindle-server/tasks_state.json"
-
-# MQTT broker — hub home-network IP (bse0 ethernet uplink)
-MQTT_HOST = os.environ.get("MQTT_HOST", "192.168.0.145")
-MQTT_PORT = 1883
+# PercyOS status API (household chores). In-cluster service name on k3s;
+# the key is the same PERCYOS_API_KEY PercyOS checks. Empty key = no chores block.
+PERCYOS_API_BASE = os.environ.get("PERCYOS_API_BASE", "http://percyos-api:8001")
+PERCYOS_API_KEY = os.environ.get("PERCYOS_API_KEY", "")
 
 # HTTP port for this server
 HTTP_PORT = 8080
