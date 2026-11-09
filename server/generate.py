@@ -3,13 +3,13 @@ Produces a 600x800 greyscale PNG for the Kindle 4 display.
 """
 
 from PIL import Image, ImageDraw, ImageFont
-from datetime import datetime, date, timezone
+from datetime import datetime
 from zoneinfo import ZoneInfo
 from weather import get_rain_warning, get_sun_times, get_forecast
 from water import get_water_temp
+from percyos import get_chores, label
 
 HELSINKI = ZoneInfo("Europe/Helsinki")
-SCOTLAND_DATE = date(2026, 7, 14)
 
 WIDTH, HEIGHT = 600, 800
 BG = 255
@@ -135,20 +135,26 @@ def generate(output_path="display.png") -> None:
             draw.text((PADDING, y), "   ".join(line_parts), font=f_large, fill=FG)
             y += 56
 
-    # --- Scotland countdown ---
-    days_to_scotland = (SCOTLAND_DATE - now.date()).days
-    if days_to_scotland > 0:
-        y += 20
+    # --- Chores: days until due, soonest first, two columns ---
+    chores = get_chores()
+    if chores:
+        y += 8
         draw.line([(PADDING, y), (WIDTH - PADDING, y)], fill=GREY, width=1)
-        y += 20
-        draw.text((PADDING, y), f"{days_to_scotland} days", font=_font(60, bold=True), fill=FG)
-        y += 72
-        draw.text((PADDING, y), "to Scotland", font=f_medium, fill=GREY)
-    elif days_to_scotland == 0:
-        y += 20
-        draw.line([(PADDING, y), (WIDTH - PADDING, y)], fill=GREY, width=1)
-        y += 20
-        draw.text((PADDING, y), "Scotland today!", font=_font(52, bold=True), fill=FG)
+        y += 16
+        f_chore_bold = _font(22, bold=True)
+        col_w = (WIDTH - 3 * PADDING) // 2
+        row_h = 30
+        rows = max(0, (HEIGHT - PADDING - 28 - y) // row_h)  # leave room for "updated"
+        for i, (name, days) in enumerate(chores[: rows * 2]):
+            x = PADDING + (i // rows) * (col_w + PADDING)
+            ry = y + (i % rows) * row_h
+            due = days is None or days <= 0
+            font = f_chore_bold if due else f_small
+            fill = FG if due else GREY
+            draw.text((x, ry), name.capitalize(), font=font, fill=fill)
+            val = label(days)
+            tw = draw.textbbox((0, 0), val, font=font)[2]
+            draw.text((x + col_w - tw, ry), val, font=font, fill=fill)
 
     # --- Updated at (bottom right, absolute) ---
     updated_str = f"updated {now.strftime('%H:%M')}"
