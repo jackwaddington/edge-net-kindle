@@ -1,6 +1,7 @@
 """
 Fetch household chores from the PercyOS status API.
-Returns [(name, days_until | None)], soonest first; [] if unreachable.
+Returns [(name, days_until | None)] due within HORIZON_DAYS, soonest first;
+[] if unreachable.
 days_until <= 0 means due/overdue; None means never done.
 """
 
@@ -8,6 +9,8 @@ import urllib.request
 import json
 
 from config import PERCYOS_API_BASE, PERCYOS_API_KEY
+
+HORIZON_DAYS = 7  # the display is a look-ahead, not the full chore list
 
 
 def get_chores() -> list[tuple[str, int | None]]:
@@ -21,7 +24,7 @@ def get_chores() -> list[tuple[str, int | None]]:
         return []
 
     items = next((s["items"] for s in data.get("sections", []) if s.get("topic") == "household_chores"), [])
-    chores = [(i["name"], i.get("days_until")) for i in items]
+    chores = [(i["name"], d) for i in items if (d := i.get("days_until")) is None or d <= HORIZON_DAYS]
     # never-done (None) sorts first: it's the most overdue
     return sorted(chores, key=lambda c: -10**6 if c[1] is None else c[1])
 
