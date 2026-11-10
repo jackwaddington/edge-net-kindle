@@ -40,6 +40,15 @@ def _center_text(draw, text, font, x, y, width, fill=FG):
     draw.text((x + (width - tw) // 2, y), text, font=font, fill=fill)
 
 
+def _fit(draw, text, font, max_w):
+    """Trim text with an ellipsis until it fits max_w pixels."""
+    if draw.textbbox((0, 0), text, font=font)[2] <= max_w:
+        return text
+    while text and draw.textbbox((0, 0), text + "…", font=font)[2] > max_w:
+        text = text[:-1]
+    return text.rstrip() + "…"
+
+
 def generate(output_path="display.png") -> None:
     img = Image.new("L", (WIDTH, HEIGHT), BG)
     draw = ImageDraw.Draw(img)
@@ -151,9 +160,10 @@ def generate(output_path="display.png") -> None:
             due = days is None or days <= 0
             font = f_chore_bold if due else f_small
             fill = FG if due else GREY
-            draw.text((x, ry), name.capitalize(), font=font, fill=fill)
             val = label(days)
             tw = draw.textbbox((0, 0), val, font=font)[2]
+            name = _fit(draw, name.capitalize(), font, col_w - tw - 12)
+            draw.text((x, ry), name, font=font, fill=fill)
             draw.text((x + col_w - tw, ry), val, font=font, fill=fill)
 
     # --- Updated at (bottom right, absolute) ---
